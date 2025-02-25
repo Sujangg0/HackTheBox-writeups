@@ -29,7 +29,7 @@
 3. When visiting the manager app, It ask for credential. Cancelling the login revel the credential:
 	1. Username -> tomcat
 	2. Password -> s3cret
-	3. ![](../Pasted%20image%2020250225221742.png)
+	3. ![](HackTheBox-writeups/Assets/Pasted%20image%2020250225222748.png)
 
 4. Landing page after loggin in:
 	   ![[Pasted image 20250221171429.png]]
