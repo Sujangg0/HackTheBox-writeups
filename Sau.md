@@ -1,10 +1,12 @@
-Machine Info
+# **Machine** Info
+
+| OS        | Linux    |
+| --------- | -------- |
+| **Level** | **Easy** |
 
 
-
-
-Walkthrough
-
+# **Walkthrough**
+## Enumeration
 1. Initial port scan for open port.
 ```
 	- ┌─[✗]─[ghoth@parrot]─[~/HTB/machines/sau]
@@ -25,7 +27,7 @@ Walkthrough
 ```
 ---
 
-1. Service scan for the open ports. 
+2. Service scan for the open ports. 
 ```
 		┌─[ghoth@parrot]─[~/HTB/machines/sau]
 		└──╼ $nmap -p22,80,8338,55555 -sC -sV -oA serviceScan 10.10.11.224Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-02-24 14:43 +0545
@@ -107,5 +109,23 @@ Walkthrough
 
 ---
 
+3. There is ssh in port 22, the port 80 is filtered which mean it can be viewed only internally and port 55555 seem to be running request basket service. 
+	- ![](Assets/Pasted%20image%2020250302202042.png)
 
-3. 
+4. It was using version 1.2.1. Google searching about this service and version revels that, it was vulnerable to SSRF (Server-side Request Forgery). It mean that, we can access the previously externally inaccessable service in port 80 through this vulnerablility.
+	- ![](Assets/Pasted%20image%2020250302202501.png)
+
+5. Changing the URL to localhost and option configuration:
+	- ![](Assets/Pasted%20image%2020250302234558.png)
+
+6. Then it show the service run on port 80, which was Maltraail (v0.53).
+	- ![](Assets/Pasted%20image%2020250302234823.png)
+
+7. I google for any vulnerability for this service version and found that it was vulnerable to OS command injection in login page. The exploit was also published on github "https://github.com/spookier/Maltrail-v0.53-Exploit". This payload allowed us to gain initial access to the user "puma".
+	- ![](Assets/Pasted%20image%2020250302235257.png)
+
+8. Checking the sudoer permission, we see  that we can run the systemctl status command using sudo (root).
+	- ![](Assets/Pasted%20image%2020250303001629.png)
+
+9. Running the command as sudoer, then i used a system command misconfiguration of systemd where LESSSECURE is not set to 1 like **CVE-2023-26604**.  It allow for the local privilege escalation to root user. Thanks Ippsec ... ;) .
+	- ![](Assets/Pasted%20image%2020250303001832.png)

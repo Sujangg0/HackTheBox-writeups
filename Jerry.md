@@ -1,7 +1,11 @@
+# **Machine Info**
+
+| OS        | Window   |
+| --------- | -------- |
+| **Level** | **Easy** |
 
 
-
-# Walkthrough
+# **Walkthrough**
 
 1. Nmap scan result in the found of Tomcat service Website running in 8080 port.
 ```
