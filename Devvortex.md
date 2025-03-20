@@ -6,7 +6,7 @@
 
 
 # **Walkthrough**
-**Enumeration**
+## **Enumeration**
 1. Scanning the open ports first revels two ports 22 and 80 running ssh and http.
 ```
 	$sudo nmap -p- --min-rate 10000 -oA portScan 10.10.11.242
@@ -126,11 +126,60 @@ Nmap done: 1 IP address (1 host up) scanned in 18.81 seconds
 - ![](Assets/Pasted%20image%2020250320053843.png)
 - ![](Assets/Pasted%20image%2020250320053911.png)
 
+8. On `System > Site template`, It seems that we can view, make changes and save the backend code from the frontend administrator account. So, I change the code in `error.php`  to reverse shell code php code from pentest monkey. Then, visited the `/administrator/error.php` giving us the reverse shell. 
+	- ![](Assets/Pasted%20image%2020250320230422.png)
+
+	- ![](Assets/Pasted%20image%2020250320230558.png)
+
+	- ![](Assets/Pasted%20image%2020250320230649.png)
+
+
+9. Then  I ran `linpea.sh` script by opening the http server in my machine and wget the file from victim machine. I found that there is port `3306` which is default for MYSQL service.
+	- ![](Assets/Pasted%20image%2020250320234708.png)
+	- I logged into mysql with the user lewis credential. And dump 2 user and password hashes.
+	- ![](Assets/Pasted%20image%2020250320235445.png)
+
+	- ![](Assets/Pasted%20image%2020250320235349.png)
+
+	- ![](Assets/Pasted%20image%2020250321000216.png)
+
+	Credentials:
+	```
+	lewis : $2y$10$6V52x.SD8Xc7hNlVwUTrI.ax4BIAYuhVBMVvnYWRceBmy8XdEzm1u
+	logan : $2y$10$IT4k5kmSGvHSO9d6M/1w0eYiB5Ne9XzArQRFJTGThNiy/yBtkIj12
+	```
+
+10. I stored the hash in `hash.txt` file and use hashcat tool to, first find the hash type, and then crack the hash.
+	- ![](Assets/Pasted%20image%2020250321001714.png)
+	- ![](Assets/Pasted%20image%2020250321001452.png)
+		Cracked Logan Password:
+`$2y$10$IT4k5kmSGvHSO9d6M/1w0eYiB5Ne9XzArQRFJTGThNiy/yBtkIj12:tequieromucho
+
+11. I ssh with the local user and cracked hash password and found the user flag.
+	![](Assets/Pasted%20image%2020250321002121.png)
+	![](Assets/Pasted%20image%2020250321002227.png)
 
 
 
+## **Privilege Escalation**
 
+12. `sudo -l` command which give list any command we can run as sudo without needing password. I found that we can run `/usr/bin/apport-cli` as sudo without password.
+	 `apport-cli is a command line tool used in ubuntu to report crashes and bugs.`
+	 ![](Assets/Pasted%20image%2020250321013221.png)
+	 
+13. The version of `apport-cli 2.20.11` is vulnerable to `CVE-2023-1326` [Here is the POC](https://github.com/diego-tella/CVE-2023-1326-PoC).
+	![](Assets/Pasted%20image%2020250321013348.png)
+	- I didn't created a crash file, instead report the bug through command line. After collecting the information and before sending the bug report, we can view the report, where we can leverage and run our command and get root shell.
+	![](Assets/Pasted%20image%2020250321011010.png)
+	![](Assets/Pasted%20image%2020250321011054.png)
 
+	![](Assets/Pasted%20image%2020250321011117.png)
 
+	![](Assets/Pasted%20image%2020250321011246.png)
+
+	![](Assets/Pasted%20image%2020250321011214.png)
+
+14. I got the root shell and view flag in `root.txt`.
+	![](Assets/Pasted%20image%2020250321011332.png)
 
 
