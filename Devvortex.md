@@ -134,7 +134,3 @@ Nmap done: 1 IP address (1 host up) scanned in 18.81 seconds
 
 
 
-https://iammr0ot.github.io/posts/devvortex/
-
-
-https://medium.com/@aniketdas07770/hackthebox-devvortex-writeup-b6fa1f007dff
